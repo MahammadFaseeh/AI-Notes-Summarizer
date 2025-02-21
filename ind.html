@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Summarizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: auto;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background: #ff5e62;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #ff9966;
+        }
+        .chat-container {
+            margin-top: 20px;
+            text-align: left;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background: #ffcccb;
+            text-align: right;
+        }
+        .bot-message {
+            background: #d4edda;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Text Summarizer</h1>
+        <textarea id="inputText" placeholder="Enter your text here..."></textarea>
+        <br>
+        <button onclick="summarizeText()">Summarize</button>
+        <div class="chat-container" id="chatBox"></div>
+    </div>
+    
+    <script>
+        function summarizeText() {
+            let inputText = document.getElementById("inputText").value;
+            
+            if (inputText.trim() === "") {
+                alert("Please enter some text to summarize.");
+                return;
+            }
+
+            // Display user input as a message
+            let chatBox = document.getElementById("chatBox");
+            let userMessage = document.createElement("div");
+            userMessage.classList.add("message", "user-message");
+            userMessage.innerText = "You: " + inputText;
+            chatBox.appendChild(userMessage);
+
+            // Clear the input box
+            document.getElementById("inputText").value = "";
+
+            fetch('http://127.0.0.1:5000/summarize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: inputText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let botMessage = document.createElement("div");
+                botMessage.classList.add("message", "bot-message");
+                botMessage.innerText = "AI: " + data.summary;
+                chatBox.appendChild(botMessage);
+
+                // Scroll to the latest message
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Failed to connect to the server. Make sure Flask is running.");
+            });
+        }
+    </script>
+</body>
+</html>
